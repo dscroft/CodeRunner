@@ -259,18 +259,6 @@ function random(len=16) {
     return str;
 }
 
-const uid = random()
-var order = @1
-var files = []
-
-var pattern = "@4".trim()
-
-if (pattern.startsWith("\`")){
-  pattern = pattern.slice(1,-1)
-} else if (pattern.length === 2 && pattern[0] === "@") {
-  pattern = null
-}
-
 function get_file(path) {
 
     var baseUrl = window.location.href.split('#')[0].split('?')[1];
@@ -283,14 +271,7 @@ function get_file(path) {
     if (xhr.status >= 200 && xhr.status < 300 || xhr.status === 0) {
         return xhr.responseText;
     }
-    throw new Error('Failed to load file: ' + xhr.status + ' ' + xhr.statusText);
-
-    /*return fetch(url).then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to load file: ' + response.status + ' ' + response.statusText);
-        }
-        return response.text();
-    })*/
+    throw new Error('Could not access ' + path + ', ' + xhr.status + ' ' + xhr.statusText);
 }
 
 function add_file(name, content) {
@@ -302,136 +283,144 @@ function add_file(name, content) {
     files.push([name, content])
 }
 
-if (order[0])
-  add_file(order[0], `@'input(0)`)
-if (order[1])
-  add_file(order[1], `@'input(1)`)
-if (order[2])
-  add_file(order[2], `@'input(2)`)
-if (order[3])
-  add_file(order[3], `@'input(3)`)
-if (order[4])
-  add_file(order[4], `@'input(4)`)
-if (order[5])
-  add_file(order[5], `@'input(5)`)
-if (order[6])
-  add_file(order[6], `@'input(6)`)
-if (order[7])
-  add_file(order[7], `@'input(7)`)
-if (order[8])
-  add_file(order[8], `@'input(8)`)
-if (order[9])
-  add_file(order[9], `@'input(9)`)
+const uid = random()
+var order = @1
+var files = []
 
-/*async function processFiles() {
-    for (let f of files) {
-        if (f[1] instanceof Promise) {
-            try {
-                f[1] = await f[1];
-            } catch (error) {
-                console.error("Error loading file:", error);
-                f[1] = "";
-            }
-        }
-    }
+var pattern = "@4".trim()
+
+if (pattern.startsWith("\`")){
+  pattern = pattern.slice(1,-1)
+} else if (pattern.length === 2 && pattern[0] === "@") {
+  pattern = null
 }
 
-processFiles();*/
-
-send.handle("input", (e) => {
-    CodeRunner.send(uid, {stdin: e}, send)
-})
-send.handle("stop",  (e) => {
-    CodeRunner.send(uid, {stop: true}, send)
-});
-
-
-CodeRunner.handle(uid, function (msg) {
-    switch (msg.service) {
-        case 'data': {
-            if (msg.ok) {
-                CodeRunner.send(uid, {compile: @2}, send)
-            }
-            else {
-                send.lia("LIA: stop")
-            }
-            break;
-        }
-        case 'compile': {
-            if (msg.ok) {
-                if (msg.message) {
-                    if (msg.problems.length)
-                        console.warn(msg.message);
-                    else
-                        console.log(msg.message);
-                }
-
-                send.lia("LIA: terminal")
-                CodeRunner.send(uid, {exec: @3, filter: pattern})
-
-                if(!@0) {
-                  console.clear()
-                }
-            } else {
-                send.lia(msg.message, msg.problems, false)
-                send.lia("LIA: stop")
-            }
-            break;
-        }
-        case 'stdout': {
-            if (msg.ok)
-                console.stream(msg.data)
-            else
-                console.error(msg.data);
-            break;
-        }
-
-        case 'stop': {
-            if (msg.error) {
-                console.error(msg.error);
-            }
-
-            if (msg.images) {
-                for(let i = 0; i < msg.images.length; i++) {
-                    console.html("<hr/>", msg.images[i].file)
-                    console.html("<img title='" + msg.images[i].file + "' src='" + msg.images[i].data + "' onclick='window.LIA.img.click(\"" + msg.images[i].data + "\")'>")
-                }
-            }
-
-            if (msg.videos) {
-                for(let i = 0; i < msg.videos.length; i++) {
-                    console.html("<hr/>", msg.videos[i].file)
-                    console.html("<video controls style='width:100%' title='" + msg.videos[i].file + "' src='" + msg.videos[i].data + "'></video>")
-                }
-            }
-
-            if (msg.files) {
-                let str = "<hr/>"
-                for(let i = 0; i < msg.files.length; i++) {
-                    str += `<a href='data:application/octet-stream${msg.files[i].data}' download="${msg.files[i].file}">${msg.files[i].file}</a> `
-                }
-
-                console.html(str)
-            }
-
-            window.console.warn(msg)
-
-            send.lia("LIA: stop")
-            break;
-        }
-
-        default:
-            console.log(msg)
-            break;
+function f() {
+    try
+    {
+        if (order[0])
+            add_file(order[0], `@'input(0)`)
+        if (order[1])
+            add_file(order[1], `@'input(1)`)
+        if (order[2])
+            add_file(order[2], `@'input(2)`)
+        if (order[3])
+            add_file(order[3], `@'input(3)`)
+        if (order[4])
+            add_file(order[4], `@'input(4)`)
+        if (order[5])
+            add_file(order[5], `@'input(5)`)
+        if (order[6])
+            add_file(order[6], `@'input(6)`)
+        if (order[7])
+            add_file(order[7], `@'input(7)`)
+        if (order[8])
+            add_file(order[8], `@'input(8)`)
+        if (order[9])
+            add_file(order[9], `@'input(9)`)
     }
-})
+    catch (error)
+    {
+        console.warn(error.message);
+        return "LIA: stop"
+    }
+
+    send.handle("input", (e) => {
+        CodeRunner.send(uid, {stdin: e}, send)
+    })
+    send.handle("stop",  (e) => {
+        CodeRunner.send(uid, {stop: true}, send)
+    });
+
+    CodeRunner.handle(uid, function (msg) {
+        switch (msg.service) {
+            case 'data': {
+                if (msg.ok) {
+                    CodeRunner.send(uid, {compile: @2}, send)
+                }
+                else {
+                    send.lia("LIA: stop")
+                }
+                break;
+            }
+            case 'compile': {
+                if (msg.ok) {
+                    if (msg.message) {
+                        if (msg.problems.length)
+                            console.warn(msg.message);
+                        else
+                            console.log(msg.message);
+                    }
+
+                    send.lia("LIA: terminal")
+                    CodeRunner.send(uid, {exec: @3, filter: pattern})
+
+                    if(!@0) {
+                    console.clear()
+                    }
+                } else {
+                    send.lia(msg.message, msg.problems, false)
+                    send.lia("LIA: stop")
+                }
+                break;
+            }
+            case 'stdout': {
+                if (msg.ok)
+                    console.stream(msg.data)
+                else
+                    console.error(msg.data);
+                break;
+            }
+
+            case 'stop': {
+                if (msg.error) {
+                    console.error(msg.error);
+                }
+
+                if (msg.images) {
+                    for(let i = 0; i < msg.images.length; i++) {
+                        console.html("<hr/>", msg.images[i].file)
+                        console.html("<img title='" + msg.images[i].file + "' src='" + msg.images[i].data + "' onclick='window.LIA.img.click(\"" + msg.images[i].data + "\")'>")
+                    }
+                }
+
+                if (msg.videos) {
+                    for(let i = 0; i < msg.videos.length; i++) {
+                        console.html("<hr/>", msg.videos[i].file)
+                        console.html("<video controls style='width:100%' title='" + msg.videos[i].file + "' src='" + msg.videos[i].data + "'></video>")
+                    }
+                }
+
+                if (msg.files) {
+                    let str = "<hr/>"
+                    for(let i = 0; i < msg.files.length; i++) {
+                        str += `<a href='data:application/octet-stream${msg.files[i].data}' download="${msg.files[i].file}">${msg.files[i].file}</a> `
+                    }
+
+                    console.html(str)
+                }
+
+                window.console.warn(msg)
+
+                send.lia("LIA: stop")
+                break;
+            }
+
+            default:
+                console.log(msg)
+                break;
+        }
+    })
 
 
-CodeRunner.send(
-    uid, { "data": files }, send, true
-);
+    CodeRunner.send(
+        uid, { "data": files }, send, true
+    );
 
-"LIA: wait"
+    return "LIA: wait"
+}
+
+f()
 </script>
 @end
 -->
